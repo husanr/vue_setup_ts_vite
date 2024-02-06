@@ -4,7 +4,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
-      path: '/',
+      path: '/', //默认重定向到main页面
       redirect: '/main'
     },
     {
@@ -16,7 +16,7 @@ const router = createRouter({
       component: () => import('@/views/main/Main.vue')
     },
     {
-      path: '/:pathMatch(.*)',
+      path: '/:pathMatch(.*)', // 路由没有匹配到 去notfound页面
       component: () => import('@/views/not-found/NotFound.vue')
     }
   ]
