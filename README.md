@@ -100,3 +100,167 @@ module.exports = {
 ```
 - 5. npx husky add .husky/commit-msg "npx --no-install commitlint --edit $1"
   添加commit-msg文件, 删除 pre-commit中的 npm test
+
+## 4. 配置路由 vue-router
+- 安装vue-router依赖
+```shell
+npm install vue-router
+```
+- 配置路由
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: '/', //默认重定向到main页面
+      redirect: '/main'
+    },
+    {
+      path: '/login',
+      component: () => import('@/views/login/Login.vue')
+    },
+    {
+      path: '/main',
+      component: () => import('@/views/main/Main.vue')
+    },
+    {
+      path: '/:pathMatch(.*)', // 路由没有匹配到 去notfound页面
+      component: () => import('@/views/not-found/NotFound.vue')
+    }
+  ]
+})
+export default router
+```
+- 在main.ts中引入
+```ts
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+import 'normalize.css'
+import '@/assets/css/index.less'
+
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
+```
+- 在App.vue中测试跳转
+```vue
+<template>
+  <div>
+    <h3>app</h3>
+    <router-link to="/login">去登录</router-link>
+    <router-link to="/main">去主页</router-link>
+    <router-view></router-view>
+  </div>
+</template>
+```
+
+## 5. 配置store 使用pinia
+- 安装pinia
+```shell
+npm install pinia
+```
+- 配置store/index.ts
+```ts
+import { createPinia } from 'pinia'
+const pinia = createPinia()
+export default pinia
+```
+- 在main.ts中引入
+```ts
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import pinia from './store'
+
+import 'normalize.css'
+import '@/assets/css/index.less'
+
+const app = createApp(App)
+app.use(router)
+app.use(pinia)
+app.mount('#app')
+```
+- 创建一个store/counter.ts使用pinia
+```ts
+import { defineStore } from 'pinia'
+const useCounterStore = defineStore('counter', {
+  state: () => ({
+    counter: 100
+  }),
+  getters: {
+    doubleCounter(state) {
+      return state.counter * 2
+    }
+  },
+  actions: {
+    changeCounter(newCounter: number) {
+      this.counter = newCounter
+    }
+  }
+})
+export default useCounterStore
+```
+- 在Main.vue页面使用counter
+```vue
+<template>
+  <div class="main">
+    <h4>{{ counterStore.counter }} --- {{ counterStore.doubleCounter }}</h4>
+    <button @click="changeCounter">改变counter</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import useCounterStore from '@/store/counter'
+
+const counterStore = useCounterStore()
+function changeCounter() {
+  // 触发actions
+  counterStore.changeCounter(999)
+}
+</script>
+```
+
+## 6. 配置axios
+- 见service
+
+## 7. 配置环境 dev prod
+- vite环境，有两种配置方式
+- 方式一: 使用import.meta.env.MODE: development/production 或者 import.meta.env.DEV/PROD
+```js
+let BASE_URL = ''
+// if (import.meta.env.MODE === 'production') {
+if (import.meta.env.PROD) {
+  // 生产环境
+  BASE_URL = 'api1'
+} else {
+  // 开发环境
+  BASE_URL = 'api2'
+}
+```
+- 方式二: 创建 .env* 文件，使用import.meta.env.[变量名]
+```shell
+# .env
+# 所有环境通用 必须以VITE开头
+VITE_BASE_NAME='code name'
+```
+```shell
+# .env.production
+# 生产环境
+VITE_BASE_URL='api1'
+```
+```shell
+# .env.development
+# 开发环境
+VITE_BASE_URL='api2'
+```
+
+- 使用
+```js
+let BASE_URL = ''
+console.log(import.meta.env.VITE_BASE_NAME)
+console.log(import.meta.env.VITE_BASE_URL)
+BASE_URL = import.meta.env.VITE_BASE_URL
+```
